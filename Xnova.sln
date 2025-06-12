@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnova", "Xnova\Xnova.csproj", "{834F9E8D-13A8-4208-9A69-00233A892A03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnova.API", "Xnova.API\Xnova.API.csproj", "{F59A2756-FCE3-436D-8B3F-EE536C7B3B27}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{834F9E8D-13A8-4208-9A69-00233A892A03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{834F9E8D-13A8-4208-9A69-00233A892A03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{834F9E8D-13A8-4208-9A69-00233A892A03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{834F9E8D-13A8-4208-9A69-00233A892A03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F59A2756-FCE3-436D-8B3F-EE536C7B3B27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F59A2756-FCE3-436D-8B3F-EE536C7B3B27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F59A2756-FCE3-436D-8B3F-EE536C7B3B27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F59A2756-FCE3-436D-8B3F-EE536C7B3B27}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7033D85D-E23F-4E86-88AF-851E30802F7E}
+	EndGlobalSection
+EndGlobal
