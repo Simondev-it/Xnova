@@ -21,5 +21,11 @@ namespace Xnova.Repositories
         {
             return await _context.Bookings.Include(p => p.BookingSlots).FirstAsync(p => p.Id == id);
         }
+        public async Task RemoveAsync(Booking booking)
+        {
+            _context.Bookings.Remove(booking);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
