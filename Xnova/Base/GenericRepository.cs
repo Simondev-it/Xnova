@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Xnova.Models;
@@ -15,6 +16,12 @@ namespace Xnova.Base
         public GenericRepository() => _context ??= new XnovaContext();
 
         public GenericRepository(XnovaContext context) => _context = context;
+
+        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _context.Set<T>().FirstOrDefaultAsync(predicate);
+        }
+
         public List<T> GetAll()
         {
             return _context.Set<T>().ToList();
@@ -96,7 +103,19 @@ namespace Xnova.Base
         {
             return await _context.Set<T>().FindAsync(code);
         }
+        public async Task<T?> GetAsync(
+    Expression<Func<T, bool>> predicate,
+    string includeProperties)
+        {
+            IQueryable<T> query = _context.Set<T>();
 
+            foreach (var includeProperty in includeProperties.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProperty.Trim());
+            }
+
+            return await query.FirstOrDefaultAsync(predicate);
+        }
         #endregion
 
 

@@ -12,6 +12,9 @@ namespace Xnova.Repositories
     {
         public FavoriteFieldRepository(XnovaContext context) => _context = context;
 
-
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

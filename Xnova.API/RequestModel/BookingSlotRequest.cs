@@ -10,8 +10,8 @@ namespace Xnova.API.RequestModel
 
         public int? SlotId { get; set; }
 
-        public virtual Booking? Booking { get; set; }
+        //public virtual Booking? Booking { get; set; }
 
-        public virtual Slot? Slot { get; set; }
+        //public virtual Slot? Slot { get; set; }
     }
 }

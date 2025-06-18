@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization; // Thêm namespace này
 using Xnova;
+using Xnova.API.Services;
 using Xnova.Models;
 
 namespace Xnova.API
@@ -25,6 +26,8 @@ namespace Xnova.API
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddSingleton<IVnpayService, VnPayService>();
 
             var app = builder.Build();
 

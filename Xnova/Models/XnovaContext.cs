@@ -39,6 +39,7 @@ public partial class XnovaContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<Venue> Venues { get; set; }
+
     public static string GetConnectionString(string connectionStringName)
     {
         var config = new ConfigurationBuilder()
@@ -52,9 +53,11 @@ public partial class XnovaContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(GetConnectionString("DefaultConnection"));
 
+
+
     //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-    //        => optionsBuilder.UseSqlServer("Data Source=LAPTOP-IVTKGI7B;Initial Catalog=Xnova;Persist Security Info=True;User ID=sa;Password=Duonggaming1@;Encrypt=False");
+    //        => optionsBuilder.UseSqlServer("Server=LAPTOP-IVTKGI7B;Database=Xnova;User Id=sa;Password=Duonggaming1@;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -176,6 +179,9 @@ public partial class XnovaContext : DbContext
             entity.Property(e => e.Date).HasColumnType("datetime");
             entity.Property(e => e.Method).HasMaxLength(255);
             entity.Property(e => e.Note).HasMaxLength(255);
+            entity.Property(e => e.Response)
+        .HasMaxLength(255)
+        .IsUnicode();
 
             entity.HasOne(d => d.Booking).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.BookingId)

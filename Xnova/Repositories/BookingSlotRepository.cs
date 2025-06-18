@@ -26,6 +26,11 @@ namespace Xnova.Repositories
         {
             return await _context.BookingSlots.Where(predicate).ToListAsync();
         }
+        public async Task<BookingSlot> GetByIdAsync(int id)
+        {
+            return await _context.BookingSlots.FirstOrDefaultAsync(bs => bs.Id == id);
+        }
+
 
     }
 

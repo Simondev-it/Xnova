@@ -26,6 +26,10 @@ namespace Xnova.Repositories
             return result;
 
         }
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
 
     }
 }

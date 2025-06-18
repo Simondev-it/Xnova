@@ -56,6 +56,11 @@ namespace Xnova.Repositories
         {
             return await _context.Payments.Where(predicate).ToListAsync();
         }
+        public async Task UpdateAsync1(Payment payment)
+        {
+            _context.Payments.Update(payment);
+            await _context.SaveChangesAsync(); // ✅ Bắt buộc phải có dòng này
+        }
 
 
     }
