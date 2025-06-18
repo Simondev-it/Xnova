@@ -69,6 +69,7 @@ namespace Xnova.API
             });
 
             // Register Services
+            builder.Services.AddMemoryCache();
             builder.Services.AddScoped<UnitOfWork>();
             builder.Services.AddSingleton<IVnpayService, VnPayService>();
 

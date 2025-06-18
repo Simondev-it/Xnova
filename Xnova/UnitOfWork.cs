@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Protocols;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,10 +23,18 @@ namespace Xnova
         private TypeRepository _typeRepository;
         private UserRepository _userRepository;
         private VenueRepository _venueRepository;
+        private ChatRepository _chatRepository;
+        private readonly IMemoryCache _memoryCache;
+
 
         public UnitOfWork(XnovaContext context)
         {
             _context = context;
+        }
+        public UnitOfWork(XnovaContext context, IMemoryCache memoryCache)
+        {
+            _context = context;
+            _memoryCache = memoryCache;
         }
         public BookingRepository BookingRepository
         {
@@ -68,6 +77,10 @@ namespace Xnova
         public VenueRepository VenueRepository
         {
             get { return _venueRepository ??= new VenueRepository(_context); }
+        }
+        public ChatRepository ChatRepository
+        {
+            get { return _chatRepository ??= new ChatRepository(_context, _memoryCache); }
         }
     }
 }
