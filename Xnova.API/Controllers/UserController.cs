@@ -14,7 +14,7 @@ namespace Xnova.API.Controllers
 
         // GET: api/User
         [HttpGet]
-        //[Authorize(Policy = "RequireAdminRole")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
             return await _unitOfWork.UserRepository.GetAllAsync();
