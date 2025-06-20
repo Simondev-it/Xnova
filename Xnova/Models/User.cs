@@ -33,5 +33,17 @@ public partial class User
 
     public virtual ICollection<FavoriteField> FavoriteFields { get; set; } = new List<FavoriteField>();
 
+    public virtual ICollection<Friend> FriendFriendNavigations { get; set; } = new List<Friend>();
+
+    public virtual ICollection<Friend> FriendUsers { get; set; } = new List<Friend>();
+
+    public virtual ICollection<Invitation> Invitations { get; set; } = new List<Invitation>();
+
+    public virtual ICollection<SaveField> SaveFields { get; set; } = new List<SaveField>();
+
+    public virtual ICollection<UserInvitation> UserInvitations { get; set; } = new List<UserInvitation>();
+
+    public virtual ICollection<UserVoucher> UserVouchers { get; set; } = new List<UserVoucher>();
+
     public virtual ICollection<Venue> Venues { get; set; } = new List<Venue>();
 }

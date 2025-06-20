@@ -17,7 +17,6 @@ public partial class Payment
 
     public string? Response { get; set; }
 
-
     public int? Status { get; set; }
 
     public int? BookingId { get; set; }

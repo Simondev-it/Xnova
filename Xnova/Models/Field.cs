@@ -21,6 +21,8 @@ public partial class Field
 
     public virtual ICollection<FavoriteField> FavoriteFields { get; set; } = new List<FavoriteField>();
 
+    public virtual ICollection<SaveField> SaveFields { get; set; } = new List<SaveField>();
+
     public virtual ICollection<Slot> Slots { get; set; } = new List<Slot>();
 
     public virtual Type? Type { get; set; }

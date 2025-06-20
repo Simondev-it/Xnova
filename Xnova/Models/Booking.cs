@@ -25,6 +25,8 @@ public partial class Booking
 
     public virtual Field? Field { get; set; }
 
+    public virtual ICollection<Invitation> Invitations { get; set; } = new List<Invitation>();
+
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public virtual User? User { get; set; }

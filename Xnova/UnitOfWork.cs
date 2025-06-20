@@ -24,6 +24,13 @@ namespace Xnova
         private UserRepository _userRepository;
         private VenueRepository _venueRepository;
         private ChatRepository _chatRepository;
+        private FriendRepository _friendRepository;
+        private InvitationRepository _invitationRepository;
+        private RelationshipRepository _relationshipRepository;
+        private SaveFieldRepository _saveFieldRepository;
+        private UserInvitationRepository _userInvitationRepository;
+        private UserVoucherRepository _userVoucherRepository;
+        private VoucherRepository _voucherRepository;
         private readonly IMemoryCache _memoryCache;
 
 
@@ -82,5 +89,34 @@ namespace Xnova
         {
             get { return _chatRepository ??= new ChatRepository(_context, _memoryCache); }
         }
+        public FriendRepository friendRepository
+        {
+            get { return _friendRepository ??= new FriendRepository(_context); }
+        }
+        public InvitationRepository InvitationRepository
+        {
+            get { return _invitationRepository ??= new InvitationRepository(_context); }
+        }
+        public RelationshipRepository relationshipRepository
+        {
+            get { return _relationshipRepository ??= new RelationshipRepository(_context); }
+        }
+        public SaveFieldRepository saveFieldRepository
+        {
+            get { return _saveFieldRepository ??= new SaveFieldRepository(_context); }
+        }
+        public UserInvitationRepository userInvitationRepository
+        {
+            get { return _userInvitationRepository  ??= new UserInvitationRepository(_context); }
+        }
+        public UserVoucherRepository userVoucherRepository
+        {
+            get { return _userVoucherRepository ??= new UserVoucherRepository(_context); }
+        }
+        public VoucherRepository voucherRepository
+        {
+            get { return _voucherRepository ??= new VoucherRepository(_context); }
+        }
+
     }
 }
