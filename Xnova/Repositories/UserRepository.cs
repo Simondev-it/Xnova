@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Xnova.Base;
@@ -38,6 +39,10 @@ namespace Xnova.Repositories
             // Giả định bạn có phương thức để kiểm tra mật khẩu đã được băm
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == username && u.Password == password);
+        }
+        public async Task<User?> FindAsync(Expression<Func<User, bool>> predicate)
+        {
+            return await _context.Users.FirstOrDefaultAsync(predicate);
         }
     }
     }
