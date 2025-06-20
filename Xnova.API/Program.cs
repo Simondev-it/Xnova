@@ -67,6 +67,14 @@ namespace Xnova.API
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
                 options.AddPolicy("RequireUserOrAdminRole", policy => policy.RequireRole("User", "Admin", "Staff"));
             });
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin", policy =>
+                    policy.WithOrigins("http://localhost:5173")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials());
+            });
 
             // Register Services
             builder.Services.AddMemoryCache();
@@ -124,7 +132,7 @@ namespace Xnova.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors("AllowSpecificOrigin");
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();

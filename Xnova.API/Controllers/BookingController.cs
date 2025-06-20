@@ -6,6 +6,8 @@ using Xnova;
 using Xnova;
 using Xnova.API.RequestModel;
 using Xnova.Models;
+using MailKit.Net.Smtp;
+using MimeKit;
 
 namespace Xnova.API.Controllers
 {
@@ -16,7 +18,7 @@ namespace Xnova.API.Controllers
         private readonly UnitOfWork _unitOfWork;
 
         public BookingController(UnitOfWork unitOfWork) => _unitOfWork = unitOfWork;
-        
+
         // GET: api/Booking
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBooking()
@@ -58,6 +60,58 @@ namespace Xnova.API.Controllers
             catch (DbUpdateException ex)
             {
                 return StatusCode(500, new { message = "Lỗi khi tạo booking.", detail = ex.Message });
+            }
+            // Lấy thông tin user để gửi email
+            var user = await _unitOfWork.UserRepository.GetAsync(u => u.Id == bookingRequest.UserId);
+            if (user != null && !string.IsNullOrEmpty(user.Email))
+            {
+                string body = $@"
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset='utf-8'>
+              <meta name='viewport' content='width=device-width, initial-scale=1'>
+            </head>
+            <body style='margin:0; padding:0; font-family:Arial, sans-serif; background-color:#f4f4f4;'>
+
+              <div style='width:100%; background-color:#f4f4f4; padding:40px 0;'>
+                <div style='max-width:700px; margin:0 auto; background:#fff; border-radius:10px; padding:30px; box-shadow:0 4px 12px rgba(0,0,0,0.1);'>
+
+                  <h2 style='color:#2d89ef; text-align:center;'>✅ Xác nhận đặt chỗ thành công</h2>
+
+                  <p>Chào <strong>{user.Name}</strong>,</p>
+
+                  <p>Bạn đã đặt chỗ thành công với thông tin như sau:</p>
+
+                  <table style='width:100%; margin-top:20px; margin-bottom:20px;'>
+                    <tr>
+                      <td style='padding:10px;'><strong>📅 Ngày đặt:</strong></td>
+                      <td style='padding:10px;'>{booking.Date:dd/MM/yyyy}</td>
+                    </tr>
+                    <tr>
+                      <td style='padding:10px;'><strong>🆔 Mã đơn:</strong></td>
+                      <td style='padding:10px;'>#{booking.Id}</td>
+                    </tr>
+                  </table>
+
+                  <p style='margin-top:20px;'>⏰ <strong>Vui lòng đến đúng giờ</strong> để không ảnh hưởng đến người khác.</p>
+
+                  
+                  <p style='font-size:14px; color:#777;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
+                  <p style='font-size:12px; color:#aaa;'>— Hệ thống đặt sân <strong>Xnova</strong></p>
+
+                </div>
+              </div>
+
+            </body>
+            </html>
+            ";
+
+
+                await SendEmailAsync(user.Email, "Xác nhận đặt chỗ", body);
+
+                // Hẹn gửi mail nhắc nhở
+                ScheduleReminder(user.Email, user.Name, booking.Date.Value.ToDateTime(TimeOnly.MinValue));
             }
 
             // Trả về dữ liệu vừa tạo
@@ -148,6 +202,48 @@ namespace Xnova.API.Controllers
             return booking;
         }
 
+        // Send mail 
+
+        private async Task SendEmailAsync(string to, string subject, string body)
+        {
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse("duongntse180440@fpt.edu.vn")); // Thay bằng email thật
+            email.To.Add(MailboxAddress.Parse(to));
+            email.Subject = subject;
+            email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = body };
+
+            using var smtp = new SmtpClient();
+            await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync("duongntse180440@fpt.edu.vn", "fsof gkfp glgf bscu"); // Dùng App Password
+            await smtp.SendAsync(email);
+            await smtp.DisconnectAsync(true);
+        }
+
+        private void ScheduleReminder(string to, string name, DateTime bookingTime)
+        {
+            var reminderTime = bookingTime.AddMinutes(-10);
+            var delay = reminderTime - DateTime.Now;
+
+            if (delay.TotalMilliseconds > 0)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(delay);
+                    string reminderBody = $@"
+                      <div style='font-family: Arial; width: 100%; box-sizing: border-box; border: 1px solid #ffc107; padding: 20px; border-radius: 10px; background-color: #fff8e1;'>
+                        <h2 style='color: #ff9800;'>Nhắc nhở lịch đặt sân</h2>
+                        <p>Chào <strong>{name}</strong>,</p>
+                        <p>Hệ thống nhắc bạn rằng bạn có lịch đặt sân vào ngày <strong>{bookingTime:dd/MM/yyyy}</strong>.</p>
+                        <p>Vui lòng đến đúng giờ để không ảnh hưởng đến thời gian sân của bạn và người khác.</p>
+                        <p style='margin-top: 20px;'>Chúc bạn có trận đấu thật vui vẻ!</p>
+                        <p style='font-size: 12px; color: gray;'>— Đội ngũ Xnova</p>
+                      </div>
+                    ";
+                    await SendEmailAsync(to, "⏰ Nhắc nhở lịch đặt sân", reminderBody);
+
+                });
+            }   
+        }
 
     }
 }
