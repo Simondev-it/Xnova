@@ -19,5 +19,35 @@ namespace Xnova.API.Controllers
         {
             return await _unitOfWork.UserRepository.GetAllAsync();
         }
+        // GET: api/User/5
+        [HttpGet("GetIDandName")]
+
+        public async Task<ActionResult<IEnumerable<object>>> GetUserIdAndName()
+        {
+            var users = await _unitOfWork.UserRepository.GetAllAsync();
+            var userIdAndNames = users.Select(user => new
+            {
+                user.Id,
+                user.Name,
+                user.Image,
+            }).ToList();
+
+            return Ok(userIdAndNames);
+        }
+        [HttpGet("{id}")]
+        [Authorize(Policy = "RequireUserOrAdminRole")]
+
+
+        public async Task<ActionResult<User>> GetUser(int id)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return user;
+        }
     }
 }
