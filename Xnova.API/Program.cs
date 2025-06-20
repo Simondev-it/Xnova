@@ -80,7 +80,7 @@ namespace Xnova.API
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<UnitOfWork>();
             builder.Services.AddSingleton<IVnpayService, VnPayService>();
-
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             // Configure Controllers and JSON options
             builder.Services.AddControllers().AddJsonOptions(options =>
             {

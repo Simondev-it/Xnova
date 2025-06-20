@@ -173,6 +173,7 @@ namespace Xnova.API.Controllers
 
             // Xóa các thanh toán liên quan (nếu có)
             var payments = await _unitOfWork.PaymentRepository.GetAllAsync(p => p.BookingId == id);
+
             _unitOfWork.PaymentRepository.RemoveRange(payments);
 
             // Xóa booking
