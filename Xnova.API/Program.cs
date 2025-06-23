@@ -65,7 +65,7 @@ namespace Xnova.API
             {
                 options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
-                options.AddPolicy("RequireUserOrAdminRole", policy => policy.RequireRole("User", "Admin", "Staff"));
+                options.AddPolicy("RequireUserOrAdminRole", policy => policy.RequireRole("User", "Admin", "Customer"));
             });
             builder.Services.AddCors(options =>
             {
