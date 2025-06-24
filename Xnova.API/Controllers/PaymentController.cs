@@ -73,7 +73,10 @@ namespace Xnova.API.Controllers
                 Amount = model.Amount, // Kiểm tra kiểu dữ liệu
                 Date = DateTime.Now,
                 Response = "Chưa thanh toán", // Đánh dấu trạng thái ban đầu là 'Pending'
-                BookingId = model.OrderId // Dùng OrderId từ model
+                BookingId = model.OrderId , // Dùng OrderId từ model
+                Status = 0 ,
+                Note = "Pay with VNPay method"
+
             };
 
 
@@ -127,6 +130,7 @@ namespace Xnova.API.Controllers
             Console.WriteLine($"Response cũ: {payment.Response}");
             // Cập nhật trạng thái khi thanh toán thành công
             payment.Response = "Đã thanh toán";
+            payment.Status = 1;
             await _unitOfWork.PaymentRepository.UpdateAsync1(payment);
 
 

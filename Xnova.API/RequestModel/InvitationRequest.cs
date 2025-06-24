@@ -16,7 +16,7 @@
         public string StartTime { get; set; }
         public string EndTime { get; set; }
         public DateTime PostingDate { get; set; }
-        public string Status { get; set; }
+        public int Status { get; set; }
         public int UserId { get; set; }
         public int BookingId { get; set; }
 
@@ -24,13 +24,13 @@
         public BookingRequest Booking { get; set; }
     }
 
-    public class BookingRequest
-    {
-        public DateTime Date { get; set; }
-        public int Rating { get; set; }
-        public string Feedback { get; set; }
-        public DateTime CurrentDate { get; set; }
-        public string Status { get; set; }
-        public int UserId { get; set; }
-    }
+    //public class BookingRequest
+    //{
+    //    public DateTime Date { get; set; }
+    //    public int Rating { get; set; }
+    //    public string Feedback { get; set; }
+    //    public DateTime CurrentDate { get; set; }
+    //    public string Status { get; set; }
+    //    public int UserId { get; set; }
+    //}
 }
