@@ -134,6 +134,7 @@ namespace Xnova.API.Controllers
             {
                 return StatusCode(500, "Không thể gửi email xác thực: " + ex.Message);
             }
+
         }
 
 

@@ -30,6 +30,11 @@ namespace Xnova.Repositories
         {
             return await _context.BookingSlots.FirstOrDefaultAsync(bs => bs.Id == id);
         }
+        public async Task AddAsync(BookingSlot bookingSlot)
+        {
+            await _context.BookingSlots.AddAsync(bookingSlot);
+            await _context.SaveChangesAsync(); // tự lưu trong repository
+        }
 
 
     }

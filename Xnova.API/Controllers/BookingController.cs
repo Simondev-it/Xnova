@@ -55,58 +55,74 @@ namespace Xnova.API.Controllers
 
             try
             {
+                // Lưu booking để có booking.Id
                 await _unitOfWork.BookingRepository.CreateAsync(booking);
+                await _unitOfWork.BookingRepository.SaveAsync();
+
+                // Thêm dữ liệu vào bảng BookingSlot
+                if (bookingRequest.SlotIds != null && bookingRequest.SlotIds.Any())
+                {
+                    foreach (var slotId in bookingRequest.SlotIds)
+                    {
+                        var bookingSlot = new BookingSlot
+                        {
+                            BookingId = booking.Id,
+                            SlotId = slotId
+                        };
+                        await _unitOfWork.BookingSlotRepository.AddAsync(bookingSlot);
+                    }
+                    await _unitOfWork.BookingSlotRepository.SaveAsync();
+                }
             }
             catch (DbUpdateException ex)
             {
                 return StatusCode(500, new { message = "Lỗi khi tạo booking.", detail = ex.Message });
             }
+
             // Lấy thông tin user để gửi email
             var user = await _unitOfWork.UserRepository.GetAsync(u => u.Id == bookingRequest.UserId);
             if (user != null && !string.IsNullOrEmpty(user.Email))
             {
                 string body = $@"
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset='utf-8'>
-              <meta name='viewport' content='width=device-width, initial-scale=1'>
-            </head>
-            <body style='margin:0; padding:0; font-family:Arial, sans-serif; background-color:#f4f4f4;'>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset='utf-8'>
+                  <meta name='viewport' content='width=device-width, initial-scale=1'>
+                </head>
+                <body style='margin:0; padding:0; font-family:Arial, sans-serif; background-color:#f4f4f4;'>
 
-              <div style='width:100%; background-color:#f4f4f4; padding:40px 0;'>
-                <div style='max-width:700px; margin:0 auto; background:#fff; border-radius:10px; padding:30px; box-shadow:0 4px 12px rgba(0,0,0,0.1);'>
+                  <div style='width:100%; background-color:#f4f4f4; padding:40px 0;'>
+                    <div style='max-width:700px; margin:0 auto; background:#fff; border-radius:10px; padding:30px; box-shadow:0 4px 12px rgba(0,0,0,0.1);'>
 
-                  <h2 style='color:#2d89ef; text-align:center;'>✅ Xác nhận đặt chỗ thành công</h2>
+                      <h2 style='color:#2d89ef; text-align:center;'>✅ Xác nhận đặt chỗ thành công</h2>
 
-                  <p>Chào <strong>{user.Name}</strong>,</p>
+                      <p>Chào <strong>{user.Name}</strong>,</p>
 
-                  <p>Bạn đã đặt chỗ thành công với thông tin như sau:</p>
+                      <p>Bạn đã đặt chỗ thành công với thông tin như sau:</p>
 
-                  <table style='width:100%; margin-top:20px; margin-bottom:20px;'>
-                    <tr>
-                      <td style='padding:10px;'><strong>📅 Ngày đặt:</strong></td>
-                      <td style='padding:10px;'>{booking.Date:dd/MM/yyyy}</td>
-                    </tr>
-                    <tr>
-                      <td style='padding:10px;'><strong>🆔 Mã đơn:</strong></td>
-                      <td style='padding:10px;'>#{booking.Id}</td>
-                    </tr>
-                  </table>
+                      <table style='width:100%; margin-top:20px; margin-bottom:20px;'>
+                        <tr>
+                          <td style='padding:10px;'><strong>📅 Ngày đặt:</strong></td>
+                          <td style='padding:10px;'>{booking.Date:dd/MM/yyyy}</td>
+                        </tr>
+                        <tr>
+                          <td style='padding:10px;'><strong>🆔 Mã đơn:</strong></td>
+                          <td style='padding:10px;'>#{booking.Id}</td>
+                        </tr>
+                      </table>
 
-                  <p style='margin-top:20px;'>⏰ <strong>Vui lòng đến đúng giờ</strong> để không ảnh hưởng đến người khác.</p>
+                      <p style='margin-top:20px;'>⏰ <strong>Vui lòng đến đúng giờ</strong> để không ảnh hưởng đến người khác.</p>
 
-                  
-                  <p style='font-size:14px; color:#777;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
-                  <p style='font-size:12px; color:#aaa;'>— Hệ thống đặt sân <strong>Xnova</strong></p>
+                      <p style='font-size:14px; color:#777;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
+                      <p style='font-size:12px; color:#aaa;'>— Hệ thống đặt sân <strong>Xnova</strong></p>
 
-                </div>
-              </div>
+                    </div>
+                  </div>
 
-            </body>
-            </html>
-            ";
-
+                </body>
+                </html>
+    ";
 
                 await SendEmailAsync(user.Email, "Xác nhận đặt chỗ", body);
 
@@ -114,9 +130,16 @@ namespace Xnova.API.Controllers
                 ScheduleReminder(user.Email, user.Name, booking.Date.Value.ToDateTime(TimeOnly.MinValue));
             }
 
-            // Trả về dữ liệu vừa tạo
-            return CreatedAtAction(nameof(GetBookingById), new { id = booking.Id }, booking);
+            // Truy vấn lại booking có bao gồm Field + Slot
+            var fullBooking = await _unitOfWork.BookingRepository.GetAsync(
+                b => b.Id == booking.Id,
+                includeProperties: "Field,BookingSlots.Slot"
+            );
+
+            // Trả về dữ liệu đã tạo đầy đủ
+            return CreatedAtAction(nameof(GetBookingById), new { id = fullBooking.Id }, fullBooking);
         }
+
 
         //StrongP@ssw0rd
 

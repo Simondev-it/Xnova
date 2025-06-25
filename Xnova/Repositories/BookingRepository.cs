@@ -26,6 +26,14 @@ namespace Xnova.Repositories
             _context.Bookings.Remove(booking);
             await _context.SaveChangesAsync();
         }
+        public async Task SaveAsync() // 👈 Triển khai SaveAsync
+        {
+            await _context.SaveChangesAsync();
+        }
+        public async Task AddAsync(BookingSlot bookingSlot)
+        {
+            await _context.BookingSlots.AddAsync(bookingSlot);
+        }
 
     }
 }

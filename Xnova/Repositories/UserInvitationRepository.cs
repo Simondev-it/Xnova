@@ -11,6 +11,15 @@ namespace Xnova.Repositories
     public class UserInvitationRepository : GenericRepository<UserInvitation>
     {
         public UserInvitationRepository(XnovaContext context) => _context = context;
+
+        public async Task AddAsync(UserInvitation entity)
+        {
+            await _context.UserInvitations.AddAsync(entity);
+        }
+        public async Task<int> CompleteAsync()
+        {
+            return await _context.SaveChangesAsync();
+        }
     }
 }
 

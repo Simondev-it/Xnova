@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Xnova.API.RequestModel;
 using Xnova.Models;
 using Xnova.Repositories;
 
@@ -7,13 +8,13 @@ namespace Xnova.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserInvivationController : ControllerBase
+    public class UserInvitationController : ControllerBase
     {
         private readonly UnitOfWork _unitOfWork;
 
-        public UserInvivationController(UnitOfWork unitOfWork) => _unitOfWork = unitOfWork;
+        public UserInvitationController(UnitOfWork unitOfWork) => _unitOfWork = unitOfWork;
 
-        // GET: api/UserVoucher
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserInvitation>>> GetAllVouchers()
         {
@@ -21,7 +22,7 @@ namespace Xnova.API.Controllers
             return Ok(vouchers);
         }
 
-        // GET: api/UserVoucher/5
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<UserInvitation>> GetVoucherById(int id)
         {
@@ -33,6 +34,36 @@ namespace Xnova.API.Controllers
             }
 
             return Ok(voucher);
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateUserInvitation([FromBody] UserInvitationRequest request)
+        {
+            if (request == null)
+                return BadRequest("Invalid data");
+
+            var userInvitation = new UserInvitation
+            {
+                JoinDate = request.JoinDate,
+                Status = request.Status,
+                UserId = request.UserId,
+                InvitationId = request.InvitationId
+            };
+
+            try
+            {
+                await _unitOfWork.userInvitationRepository.AddAsync(userInvitation);
+                await _unitOfWork.userInvitationRepository.CompleteAsync();
+
+                return Ok(new
+                {
+                    Message = "Invitation created successfully",
+                    Data = userInvitation
+                });
+            }
+            catch (Exception ex)    
+            {
+                return StatusCode(500, $"Lỗi server: {ex.Message}");
+            }
         }
     }
 

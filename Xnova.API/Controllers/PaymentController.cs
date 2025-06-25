@@ -50,10 +50,6 @@ namespace Xnova.API.Controllers
             }
             return Ok(payment);
         }
-
-
-
-
         //Vnpay
 
 
@@ -64,7 +60,6 @@ namespace Xnova.API.Controllers
             {
                 return BadRequest("Request cannot be null.");
             }
-
             // Tạo đối tượng Payment và lưu vào cơ sở dữ liệu
             var payment = new Payment
             {
@@ -76,10 +71,7 @@ namespace Xnova.API.Controllers
                 BookingId = model.OrderId , // Dùng OrderId từ model
                 Status = 0 ,
                 Note = "Pay with VNPay method"
-
             };
-
-
             try
             {
                 await _unitOfWork.PaymentRepository.CreateAsync(payment);
@@ -100,7 +92,6 @@ namespace Xnova.API.Controllers
                     Error = ex.InnerException?.Message ?? ex.Message
                 });
             }
-
             // Tạo URL thanh toán thông qua VNPay
             var paymentUrl = _vpnpayService.CreatePaymentUrl(HttpContext, model);
 
@@ -117,9 +108,6 @@ namespace Xnova.API.Controllers
                 string FailUrl = $"http://localhost:5173?message={Uri.EscapeDataString($"Thanh toán không thành công")}";
                 return Redirect(FailUrl);
             }
-
-
-
             var payment = await _unitOfWork.PaymentRepository.GetByBookingIdAsync(response.OrderId);
             if (payment == null)
             {
@@ -132,12 +120,9 @@ namespace Xnova.API.Controllers
             payment.Response = "Đã thanh toán";
             payment.Status = 1;
             await _unitOfWork.PaymentRepository.UpdateAsync1(payment);
-
-
             // Chuyển hướng đến trang thanh toán thành công
             string successUrl = $"https://localhost:7226/swagger/index.html?message={Uri.EscapeDataString("Thanh toán thành công")}";
             return Redirect(successUrl);
-
         }
         [HttpGet("PaymentResult")]
         public IActionResult PaymentResult(string message)
