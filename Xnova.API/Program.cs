@@ -80,6 +80,8 @@ namespace Xnova.API
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<UnitOfWork>();
             builder.Services.AddSingleton<IVnpayService, VnPayService>();
+            builder.Services.AddHttpClient<WeatherService>();
+
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             // Configure Controllers and JSON options
             builder.Services.AddControllers().AddJsonOptions(options =>
@@ -126,13 +128,18 @@ namespace Xnova.API
             });
 
             var app = builder.Build();
-
-            // Middleware pipeline
-            if (app.Environment.IsDevelopment())
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+                c.RoutePrefix = "swagger"; // truy cập tại /swagger
+            });
+            // Middleware pipeline
+            //if (app.Environment.IsDevelopment())
+            //{
+            //    app.UseSwagger();
+            //    app.UseSwaggerUI();
+            //}
             app.UseCors("AllowSpecificOrigin");
             app.UseHttpsRedirection();
             app.UseAuthentication();
