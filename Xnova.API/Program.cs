@@ -8,6 +8,7 @@ using Xnova;
 using Xnova.API.Services;
 using Xnova.Models;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Xnova.API
 {
@@ -127,27 +128,29 @@ namespace Xnova.API
                 });
             });
 
+            //var builder = WebApplication.CreateBuilder(args);
+
+            // Cấu hình DataProtection (nếu dùng cookie/session)
+            builder.Services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
+                .SetApplicationName("XnovaApp");
+
             var app = builder.Build();
-            // Chỉ bật HTTPS redirection khi chạy local
+
+            // Chỉ redirect HTTPS khi chạy local
             if (app.Environment.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
-                app.UseHttpsRedirection(); // ✅ CHỈ bật ở môi trường dev
+                app.UseHttpsRedirection();
             }
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
-                c.RoutePrefix = "swagger"; // truy cập tại /swagger
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Xnova API");
+                c.RoutePrefix = "swagger";
             });
-            // Middleware pipeline
-            //if (app.Environment.IsDevelopment())
-            //{
-            //    app.UseSwagger();
-            //    app.UseSwaggerUI();
-            //}
+
             app.UseCors("AllowSpecificOrigin");
-            app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
