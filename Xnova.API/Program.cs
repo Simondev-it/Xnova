@@ -128,6 +128,12 @@ namespace Xnova.API
             });
 
             var app = builder.Build();
+            // Chỉ bật HTTPS redirection khi chạy local
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseHttpsRedirection(); // ✅ CHỈ bật ở môi trường dev
+            }
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
