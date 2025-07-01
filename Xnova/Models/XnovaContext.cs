@@ -64,7 +64,7 @@ public partial class XnovaContext : DbContext
         return connectionString;
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(GetConnectionString("DefaultConnection"));
+        => optionsBuilder.UseNpgsql(GetConnectionString("DefaultConnection"));
 
 
     //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

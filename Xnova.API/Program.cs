@@ -23,7 +23,7 @@ namespace Xnova.API
 
             // Configure EF DbContext
             builder.Services.AddDbContext<XnovaContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Configure JWT Authentication
             builder.Services.AddAuthentication(options =>
@@ -128,7 +128,7 @@ namespace Xnova.API
                 });
             });
 
-            //var builder = WebApplication.CreateBuilder(args);
+            //var builder = WebApplication.CreateBuilder(args); 
 
             // Cấu hình DataProtection (nếu dùng cookie/session)
             builder.Services.AddDataProtection()
