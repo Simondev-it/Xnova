@@ -70,11 +70,13 @@ namespace Xnova.API
             });
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowSpecificOrigin", policy =>
-                    policy.WithOrigins("http://localhost:5173")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials());
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
             });
 
             // Register Services
@@ -150,7 +152,7 @@ namespace Xnova.API
                 c.RoutePrefix = "swagger";
             });
 
-            app.UseCors("AllowSpecificOrigin");
+            app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
