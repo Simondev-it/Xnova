@@ -61,12 +61,13 @@ namespace Xnova.API.Controllers
                 return BadRequest("Request cannot be null.");
             }
             // Tạo đối tượng Payment và lưu vào cơ sở dữ liệu
+            var utcDate = DateTime.UtcNow;
             var payment = new Payment
             {
                 //Id = model.Id,
                 Method = "Thanh toán qua VNPay",
                 Amount = model.Amount, // Kiểm tra kiểu dữ liệu
-                Date = DateTime.Now,
+                Date = utcDate,
                 Response = "Chưa thanh toán", // Đánh dấu trạng thái ban đầu là 'Pending'
                 BookingId = model.OrderId , // Dùng OrderId từ model
                 Status = 0 ,
@@ -104,26 +105,38 @@ namespace Xnova.API.Controllers
 
             if (response == null || response.VnPayResponsecode != "00")
             {
-                // Chuyển hướng đến trang lỗi thanh toán với thông báo
-                string FailUrl = $"http://localhost:5173?message={Uri.EscapeDataString($"Thanh toán không thành công")}";
+                string FailUrl = $"http://localhost:5173?message={Uri.EscapeDataString("Thanh toán không thành công")}";
                 return Redirect(FailUrl);
             }
+
             var payment = await _unitOfWork.PaymentRepository.GetByBookingIdAsync(response.OrderId);
             if (payment == null)
             {
                 return NotFound("Không tìm thấy đơn hàng thanh toán.");
             }
+
+            // ✅ Đảm bảo Date luôn là UTC
+            if (payment.Date.HasValue && payment.Date.Value.Kind != DateTimeKind.Utc)
+            {
+                payment.Date = DateTime.SpecifyKind(payment.Date.Value, DateTimeKind.Utc);
+            }
+
             Console.WriteLine("===> Trước khi cập nhật:");
             Console.WriteLine($"BookingId: {response.OrderId}");
             Console.WriteLine($"Response cũ: {payment.Response}");
-            // Cập nhật trạng thái khi thanh toán thành công
+
+            // ✅ Cập nhật trạng thái thanh toán
             payment.Response = "Đã thanh toán";
             payment.Status = 1;
+
             await _unitOfWork.PaymentRepository.UpdateAsync1(payment);
-            // Chuyển hướng đến trang thanh toán thành công
+
             string successUrl = $"https://localhost:7226/swagger/index.html?message={Uri.EscapeDataString("Thanh toán thành công")}";
             return Redirect(successUrl);
         }
+
+
+        
         [HttpGet("PaymentResult")]
         public IActionResult PaymentResult(string message)
         {
