@@ -30,9 +30,12 @@ namespace Xnova.Repositories
         {
             return await _context.Set<Payment>().FirstOrDefaultAsync(predicate);
         }
-        public async Task<Payment> GetByBookingIdAsync(int bookingId)
+        public async Task<Payment?> GetByBookingIdAsync(int bookingId)
         {
-            return await _context.Payments.FirstOrDefaultAsync(p => p.BookingId == bookingId);
+            return await _context.Payments
+                .Where(p => p.BookingId == bookingId && p.Status == 0) // ⚠️ chỉ lấy bản chưa thanh toán
+                .OrderByDescending(p => p.Id) // Ưu tiên bản mới nhất
+                .FirstOrDefaultAsync();
         }
         public async Task<Payment> GetByOrderIdAsync(int orderId)
         {
@@ -58,9 +61,16 @@ namespace Xnova.Repositories
         }
         public async Task UpdateAsync1(Payment payment)
         {
-            _context.Payments.Update(payment);
-            await _context.SaveChangesAsync(); // ✅ Bắt buộc phải có dòng này
+            _context.Attach(payment); // đảm bảo EF đang tracking entity này
+
+            // Chỉ định rõ các property cần cập nhật
+            _context.Entry(payment).Property(p => p.Status).IsModified = true;
+            _context.Entry(payment).Property(p => p.Response).IsModified = true;
+            _context.Entry(payment).Property(p => p.Date).IsModified = true;
+
+            await _context.SaveChangesAsync();
         }
+
 
 
     }

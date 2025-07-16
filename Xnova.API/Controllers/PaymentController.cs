@@ -73,6 +73,12 @@ namespace Xnova.API.Controllers
                 Status = 0 ,
                 Note = "Pay with VNPay method"
             };
+            var existingPayment = await _unitOfWork.PaymentRepository.GetByBookingIdAsync(model.OrderId);
+            if (existingPayment != null)
+            {
+                return BadRequest("Đơn này đã có thanh toán đang chờ, không thể tạo mới.");
+            }
+
             try
             {
                 await _unitOfWork.PaymentRepository.CreateAsync(payment);
@@ -116,20 +122,27 @@ namespace Xnova.API.Controllers
             }
 
             // ✅ Đảm bảo Date luôn là UTC
-            if (payment.Date.HasValue && payment.Date.Value.Kind != DateTimeKind.Utc)
-            {
-                payment.Date = DateTime.SpecifyKind(payment.Date.Value, DateTimeKind.Utc);
-            }
+            payment.Date = DateTime.UtcNow;
 
             Console.WriteLine("===> Trước khi cập nhật:");
             Console.WriteLine($"BookingId: {response.OrderId}");
             Console.WriteLine($"Response cũ: {payment.Response}");
 
-            // ✅ Cập nhật trạng thái thanh toán
-            payment.Response = "Đã thanh toán";
-            payment.Status = 1;
+            if (payment.Status != 1)
+            {
+                payment.Status = 1;
+                payment.Response = "Đã thanh toán";
+                payment.Date = DateTime.UtcNow;
+                await _unitOfWork.PaymentRepository.UpdateAsync1(payment);
+                Console.WriteLine("✅ Trạng thái thanh toán đã được cập nhật.");
+            }
+            else
+            {
+                Console.WriteLine("⚠️ Đơn hàng đã được thanh toán từ trước, không cập nhật lại.");
+            }
 
-            await _unitOfWork.PaymentRepository.UpdateAsync1(payment);
+
+            //await _unitOfWork.PaymentRepository.UpdateAsync1(payment);
 
             string successUrl = $"https://localhost:7226/swagger/index.html?message={Uri.EscapeDataString("Thanh toán thành công")}";
             return Redirect(successUrl);

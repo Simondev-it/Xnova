@@ -35,6 +35,7 @@ namespace Xnova.API.Controllers
         {
             return await _unitOfWork.UserRepository.GetAllAsync();
         }
+
         // GET: api/User/5
         [HttpGet("GetIdAndName")]
 
@@ -187,6 +188,7 @@ namespace Xnova.API.Controllers
             public string Email { get; set; }
             public string Otp { get; set; }
         }
+
 
     }
 }
