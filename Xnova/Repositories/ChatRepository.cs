@@ -16,6 +16,7 @@ namespace Xnova.Repositories
         private readonly XnovaContext _context;
         private readonly IMemoryCache _memoryCache;
         private const string HistoryPrefix = "ChatHistory_";
+        private readonly string _defaultGreeting = "Xin chào! Tôi là trợ lý AI của bạn. Hãy đặt câu hỏi để tôi hỗ trợ nhé!";
 
         public ChatRepository(XnovaContext context, IMemoryCache memoryCache)
         {
@@ -24,28 +25,47 @@ namespace Xnova.Repositories
             _memoryCache = memoryCache;
         }
 
-        public void SaveToHistory(string userId, string question, string answer)
+        public string GetGreeting()
         {
-            var key = HistoryPrefix + userId;
+            return _defaultGreeting;
+        }
+
+        public void SaveToHistory(string? userId, string question, string answer)
+        {
+            // Sử dụng sessionId cho guest nếu userId là null
+            var key = HistoryPrefix + (userId ?? Guid.NewGuid().ToString());
             var history = _memoryCache.Get<List<(string Question, string Answer)>>(key) ?? new List<(string, string)>();
             history.Add((question, answer));
             _memoryCache.Set(key, history, TimeSpan.FromMinutes(30));
 
-            Console.WriteLine($"[SaveToHistory] userId={userId} saved {history.Count} entries");
+            Console.WriteLine($"[SaveToHistory] key={key} saved {history.Count} entries");
         }
 
-        public List<(string Question, string Answer)> GetHistory(string userId)
+        public List<(string Question, string Answer)> GetHistory(string? userId)
         {
+            // Trả về lịch sử rỗng cho guest nếu không có userId hoặc sessionId
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("[GetHistory] No history for guest without session.");
+                return new List<(string, string)>();
+            }
+
             var key = HistoryPrefix + userId;
             var history = _memoryCache.Get<List<(string Question, string Answer)>>(key) ?? new List<(string, string)>();
-            Console.WriteLine($"[GetHistory] userId={userId} retrieved {history.Count} entries");
+            Console.WriteLine($"[GetHistory] key={key} retrieved {history.Count} entries");
             return history;
         }
 
-        public async Task<string> AskAsync(string prompt, string userId)
+        public async Task<(string Reply, string? SessionId)> AskAsync(string prompt, string? userId)
         {
-            // 1. Lấy lịch sử chat hiện tại của user
-            var history = GetHistory(userId); // List<(string Question, string Answer)>
+            string? sessionId = null;
+            if (string.IsNullOrEmpty(userId))
+            {
+                sessionId = Guid.NewGuid().ToString(); // Tạo sessionId cho guest
+            }
+
+            // 1. Lấy lịch sử chat hiện tại
+            var history = GetHistory(userId ?? sessionId);
 
             // 2. Tạo đoạn prompt kèm ngữ cảnh (history)
             var sb = new StringBuilder();
@@ -74,18 +94,17 @@ namespace Xnova.Repositories
                 _ => "Không rõ câu hỏi liên quan đến dữ liệu nào."
             };
 
-            // Bạn có thể thêm phần dữ liệu liên quan vào prompt nếu cần
             var combinedPrompt = $"{promptWithHistory}\n\nDữ liệu liên quan:\n{JsonSerializer.Serialize(dbResult)}";
 
             var body = new
             {
                 contents = new[]
                 {
-            new
-            {
-                parts = new[] { new { text = combinedPrompt } }
-            }
-        }
+                    new
+                    {
+                        parts = new[] { new { text = combinedPrompt } }
+                    }
+                }
             };
 
             var json = JsonSerializer.Serialize(body);
@@ -96,7 +115,10 @@ namespace Xnova.Repositories
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                return $"Error: {result}";
+            {
+                SaveToHistory(userId ?? sessionId, prompt, $"Error: {result}");
+                return ($"Error: {result}", sessionId);
+            }
 
             using var doc = JsonDocument.Parse(result);
             var reply = doc.RootElement
@@ -107,9 +129,9 @@ namespace Xnova.Repositories
                            .GetString();
 
             // 4. Lưu câu hỏi + trả lời mới vào cache
-            SaveToHistory(userId, prompt, reply ?? "Không có phản hồi.");
+            SaveToHistory(userId ?? sessionId, prompt, reply ?? "Không có phản hồi.");
 
-            return reply ?? "Không có phản hồi.";
+            return (reply ?? "Không có phản hồi.", sessionId);
         }
 
         private string IdentifyEntity(string prompt)
