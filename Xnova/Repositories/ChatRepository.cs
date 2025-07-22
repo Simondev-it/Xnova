@@ -69,8 +69,6 @@ namespace Xnova.Repositories
 
             // 2. Tạo đoạn prompt kèm ngữ cảnh (history)
             var sb = new StringBuilder();
-
-            // Append history
             foreach (var (q, a) in history)
             {
                 sb.AppendLine($"Q: {q}");
@@ -78,33 +76,50 @@ namespace Xnova.Repositories
                 sb.AppendLine();
             }
 
-            // Append câu hỏi mới
             sb.AppendLine($"Q: {prompt}");
             sb.Append("A: ");
 
             string promptWithHistory = sb.ToString();
 
-            // 3. Gửi promptWithHistory lên API Gemini
+            // 3. Xác định loại dữ liệu và lấy dữ liệu liên quan từ DB
             string entityType = IdentifyEntity(prompt);
-            object dbResult = entityType.ToLower() switch
-            {
-                "user" => _context.Users.Take(100).ToList(),
-                "booking" => _context.Bookings.Take(100).ToList(),
-                "pod" => _context.Fields.Take(100).ToList(),
-                _ => "Không rõ câu hỏi liên quan đến dữ liệu nào."
-            };
+            object dbResult;
 
+            if (entityType.ToLower() == "booking")
+            {
+                if (int.TryParse(userId, out int parsedUserId))
+                {
+                    // Lấy danh sách booking của user có userId đó
+                    dbResult = GetUserBookingHistory(parsedUserId);
+
+                }
+                else
+                {
+                    dbResult = "Không thể xác định người dùng để truy xuất lịch sử booking.";
+                }
+            }
+            else
+            {
+                dbResult = entityType.ToLower() switch
+                {
+                    "user" => _context.Users.Take(100).ToList(),
+                    "field" => _context.Fields.Take(100).ToList(),
+                    _ => "Không rõ câu hỏi liên quan đến dữ liệu nào."
+                };
+            }
+
+            // 4. Tạo prompt đầy đủ gồm dữ liệu + lịch sử
             var combinedPrompt = $"{promptWithHistory}\n\nDữ liệu liên quan:\n{JsonSerializer.Serialize(dbResult)}";
 
             var body = new
             {
                 contents = new[]
                 {
-                    new
-                    {
-                        parts = new[] { new { text = combinedPrompt } }
-                    }
-                }
+            new
+            {
+                parts = new[] { new { text = combinedPrompt } }
+            }
+        }
             };
 
             var json = JsonSerializer.Serialize(body);
@@ -128,11 +143,12 @@ namespace Xnova.Repositories
                            .GetProperty("text")
                            .GetString();
 
-            // 4. Lưu câu hỏi + trả lời mới vào cache
+            // 5. Lưu lại phản hồi mới vào cache
             SaveToHistory(userId ?? sessionId, prompt, reply ?? "Không có phản hồi.");
 
             return (reply ?? "Không có phản hồi.", sessionId);
         }
+
 
         private string IdentifyEntity(string prompt)
         {
@@ -151,5 +167,27 @@ namespace Xnova.Repositories
 
             return "unknown";
         }
+        private object GetUserBookingHistory(int userId)
+        {
+            var bookings = _context.Bookings
+                .Where(b => b.UserId == userId)
+                .OrderByDescending(b => b.CurrentDate)
+                .Take(10)
+                .Select(b => new
+                {
+                    b.Id,
+                    b.Date,
+                    b.CurrentDate,
+                    b.Feedback,
+                    b.Rating,
+                    b.Status,
+                    FieldName = b.Field != null ? b.Field.Name : "Không có"
+                })
+                .ToList();
+
+            return bookings;
+        }
+
+
     }
 }

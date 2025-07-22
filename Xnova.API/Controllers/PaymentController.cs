@@ -111,7 +111,7 @@ namespace Xnova.API.Controllers
 
             if (response == null || response.VnPayResponsecode != "00")
             {
-                string FailUrl = $"http://localhost:5173?message={Uri.EscapeDataString("Thanh toán không thành công")}";
+                string FailUrl = $"https://xnova-v2.vercel.app/?message={Uri.EscapeDataString("Thanh toán không thành công")}";
                 return Redirect(FailUrl);
             }
 
@@ -144,7 +144,7 @@ namespace Xnova.API.Controllers
 
             //await _unitOfWork.PaymentRepository.UpdateAsync1(payment);
 
-            string successUrl = $"https://localhost:7226/swagger/index.html?message={Uri.EscapeDataString("Thanh toán thành công")}";
+            string successUrl = $"https://xnova-v2.vercel.app/?message={Uri.EscapeDataString("Thanh toán thành công")}";
             return Redirect(successUrl);
         }
 
