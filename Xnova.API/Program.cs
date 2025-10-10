@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.DataProtection;
 
 namespace Xnova.API
 {
+
     public class Program
     {
         public static void Main(string[] args)
