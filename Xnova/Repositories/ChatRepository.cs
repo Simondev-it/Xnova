@@ -12,7 +12,7 @@ namespace Xnova.Repositories
     public class ChatRepository
     {
         private readonly HttpClient _httpClient;
-        private readonly string _apiKey = "AIzaSyCLz5PRiSana5TSg3KOjjslqGlfTMt8tI0";
+        private readonly string _apiKey = "AIzaSyA0xpQFSGtnf4qDP3S-rTI2C63XBW-hIno";
         private readonly XnovaContext _context;
         private readonly IMemoryCache _memoryCache;
         private const string HistoryPrefix = "ChatHistory_";
