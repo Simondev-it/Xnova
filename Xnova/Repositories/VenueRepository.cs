@@ -23,5 +23,16 @@ namespace Xnova.Repositories
 
             return result;
         }
+
+        /// <summary>
+        /// Lấy tất cả venues của một owner
+        /// </summary>
+        public async Task<List<Venue>> GetVenuesByOwnerIdAsync(int ownerId)
+        {
+            return await _context.Venues
+                .Where(v => v.UserId == ownerId)
+                .Include(v => v.Fields)
+                .ToListAsync();
+        }
     }
 }

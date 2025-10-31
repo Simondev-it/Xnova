@@ -1,0 +1,105 @@
+### Owner Report API - Test Requests
+### Sử dụng với REST Client extension trong VS Code
+
+@baseUrl = https://localhost:7186
+@ownerId = 1
+
+### ====================
+### TEST ENDPOINTS (NO AUTH)
+### ====================
+
+### 1. Test Dashboard (No Auth)
+GET {{baseUrl}}/api/owner/reports/test/dashboard?ownerId={{ownerId}}
+Content-Type: application/json
+
+###
+
+### 2. Test Revenue Report - Last 7 Days (No Auth)
+GET {{baseUrl}}/api/owner/reports/test/revenue?ownerId={{ownerId}}&startDate=2025-10-20&endDate=2025-10-27
+Content-Type: application/json
+
+###
+
+### 3. Test Revenue Report - This Month (No Auth)
+GET {{baseUrl}}/api/owner/reports/test/revenue?ownerId={{ownerId}}&startDate=2025-10-01&endDate=2025-10-27
+Content-Type: application/json
+
+###
+
+### ====================
+### PRODUCTION ENDPOINTS (WITH AUTH)
+### ====================
+
+@token = YOUR_JWT_TOKEN_HERE
+
+### 4. Get Revenue Report (With Auth)
+GET {{baseUrl}}/api/owner/reports/revenue?ownerId={{ownerId}}&startDate=2025-10-01&endDate=2025-10-27
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 5. Get Revenue Report by Period - Month (With Auth)
+GET {{baseUrl}}/api/owner/reports/revenue/period/month?ownerId={{ownerId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 6. Get Booking Report (With Auth)
+GET {{baseUrl}}/api/owner/reports/bookings?ownerId={{ownerId}}&startDate=2025-10-01&endDate=2025-10-27
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 7. Get User Report (With Auth)
+GET {{baseUrl}}/api/owner/reports/users?ownerId={{ownerId}}&startDate=2025-10-01&endDate=2025-10-27
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 8. Get Performance Report (With Auth)
+GET {{baseUrl}}/api/owner/reports/performance?ownerId={{ownerId}}&startDate=2025-10-01&endDate=2025-10-27
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 9. Get Dashboard Summary (With Auth)
+GET {{baseUrl}}/api/owner/reports/dashboard?ownerId={{ownerId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 10. Export Report (With Auth)
+POST {{baseUrl}}/api/owner/reports/export
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "ownerId": {{ownerId}},
+  "reportType": "revenue",
+  "format": "csv",
+  "startDate": "2025-10-01",
+  "endDate": "2025-10-27"
+}
+
+###
+
+### ====================
+### LOGIN TO GET TOKEN
+### ====================
+
+### Login to get JWT token
+POST {{baseUrl}}/api/login
+Content-Type: application/json
+
+{
+  "email": "owner@example.com",
+  "password": "your_password"
+}
+
+###

@@ -18,6 +18,11 @@ namespace Xnova.Repositories
             return await _context.Users.Include(p => p.Bookings).ToListAsync();
         }
 
+        public async Task<List<User>> GetAllWithVenuesAsync()
+        {
+            return await _context.Users.Include(u => u.Venues).ToListAsync();
+        }
+
         public async Task<User> GetByIdAsync(int id)
         {
             var result = await _context.Users.Include(p => p.Bookings).FirstAsync(p => p.Id == id);

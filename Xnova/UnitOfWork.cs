@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
@@ -31,8 +31,8 @@ namespace Xnova
         private UserInvitationRepository _userInvitationRepository;
         private UserVoucherRepository _userVoucherRepository;
         private VoucherRepository _voucherRepository;
+        private OwnerReportRepository _ownerReportRepository;
         private readonly IMemoryCache _memoryCache;
-
 
         public UnitOfWork(XnovaContext context)
         {
@@ -116,6 +116,10 @@ namespace Xnova
         public VoucherRepository voucherRepository
         {
             get { return _voucherRepository ??= new VoucherRepository(_context); }
+        }
+        public OwnerReportRepository OwnerReportRepository
+        {
+            get { return _ownerReportRepository ??= new OwnerReportRepository(_context); }
         }
 
     }

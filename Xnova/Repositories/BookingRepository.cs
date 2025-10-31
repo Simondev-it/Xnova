@@ -35,5 +35,28 @@ namespace Xnova.Repositories
             await _context.BookingSlots.AddAsync(bookingSlot);
         }
 
+        /// <summary>
+        /// Lấy bookings theo danh sách fieldIds và khoảng thời gian
+        /// </summary>
+        public async Task<List<Booking>> GetBookingsByFieldIdsAndDateRangeAsync(
+            List<int> fieldIds, 
+            DateOnly startDate, 
+            DateOnly endDate)
+        {
+            return await _context.Bookings
+                .Where(b => b.FieldId.HasValue 
+                    && fieldIds.Contains(b.FieldId.Value)
+                    && b.Date.HasValue
+                    && b.Date.Value >= startDate
+                    && b.Date.Value <= endDate)
+                .Include(b => b.Field)
+                    .ThenInclude(f => f.Venue)
+                .Include(b => b.User)
+                .Include(b => b.Payments)
+                .Include(b => b.BookingSlots)
+                    .ThenInclude(bs => bs.Slot)
+                .ToListAsync();
+        }
+
     }
 }
